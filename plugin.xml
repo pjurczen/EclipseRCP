@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         id="application"
+         point="org.eclipse.core.runtime.applications">
+      <application>
+         <run
+               class="pl.books.app.Application">
+         </run>
+      </application>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            name="Perspective"
+            class="pl.books.app.Perspective"
+            id="pl.books.perspective">
+      </perspective>
+      <perspective
+            class="pl.books.perspectives.BooksListPerspective"
+            id="pl.books.perspective.BooksListPerspective"
+            name="Books List">
+      </perspective>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            name="View"
+            class="pl.books.app.View"
+            id="pl.books.view">
+      </view>
+      <view
+            class="pl.books.views.BooksListView"
+            id="pl.books.views.BooksListView"
+            name="Books List"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="pl.books.perspective.BooksListPerspective">
+         <view
+               id="pl.books.views.BooksListView"
+               minimized="false"
+               relationship="left"
+               relative="org.eclipse.ui.editorss"
+               standalone="true">
+         </view>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="pl.books.perspective">
+         <view
+               id="pl.books.view"
+               minimized="false"
+               ratio="0.5"
+               relationship="left"
+               relative="org.eclipse.ui.editorss">
+         </view>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu">
+         <menu
+               label="File">
+            <command
+                  commandId="org.eclipse.ui.file.exit"
+                  label="Exit">
+            </command>
+         </menu>
+      </menuContribution>
+   </extension>
+
+</plugin>
