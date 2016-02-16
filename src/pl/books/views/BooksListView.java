@@ -1,8 +1,10 @@
 package pl.books.views;
 
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.ViewPart;
 
+import pl.books.dialog.BookDialog;
 import pl.books.model.Book;
 import pl.books.model.BookComparator;
 import pl.books.model.BookFilter;
@@ -10,14 +12,28 @@ import pl.books.model.ModelProvider;
 
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.GroupMarker;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.databinding.viewers.ViewerSupport;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
@@ -28,6 +44,7 @@ public class BooksListView extends ViewPart {
     private BookFilter filter;
     private BookComparator comparator;
     private Text searchText;
+    private IObservableList input;
 
     @Override
     public void createPartControl(Composite parent) {
@@ -55,14 +72,12 @@ public class BooksListView extends ViewPart {
         final Table table = viewer.getTable();
         table.setHeaderVisible(true);
         table.setLinesVisible(true);
-
-        viewer.setContentProvider(new ArrayContentProvider());
-        // get the content for the viewer, setInput will call getElements in the
-        // contentProvider
-        viewer.setInput(ModelProvider.INSTANCE.getBooks());
-        // make the selection available to other views
+        
+        input = new WritableList(ModelProvider.INSTANCE.getBooks(), Book.class);
+        ViewerSupport.bind(viewer, input, BeanProperties.values(new String[] { "title", "author" })); 
+        
         getSite().setSelectionProvider(viewer);
-        // set the sorter for the table
+        
         searchText.addKeyListener(new KeyAdapter() {
             public void keyReleased(KeyEvent keyEvent) {
                 filter.setSearchText(searchText.getText());
@@ -70,7 +85,6 @@ public class BooksListView extends ViewPart {
             }
         });
         
-        // define layout for the viewer
         GridData gridData = new GridData();
         gridData.verticalAlignment = GridData.FILL;
         gridData.horizontalSpan = 2;
@@ -78,18 +92,18 @@ public class BooksListView extends ViewPart {
         gridData.grabExcessVerticalSpace = true;
         gridData.horizontalAlignment = GridData.FILL;
         viewer.getControl().setLayoutData(gridData);
+        
+        createContextMenu(viewer);
     }
     
     public TableViewer getViewer() {
         return viewer;
     }
     
-    // create the columns for the table
     private void createColumns(final Composite parent, final TableViewer viewer) {
         String[] titles = { "Book title", "Author" };
         int[] bounds = { 200, 164 };
 
-        // first column is for the title
         TableViewerColumn col = createTableViewerColumn(titles[0], bounds[0], 0);
         col.setLabelProvider(new ColumnLabelProvider() {
             @Override
@@ -99,7 +113,6 @@ public class BooksListView extends ViewPart {
             }
         });
 
-        // second column is for the author
         col = createTableViewerColumn(titles[1], bounds[1], 1);
         col.setLabelProvider(new ColumnLabelProvider() {
             @Override
@@ -117,7 +130,81 @@ public class BooksListView extends ViewPart {
         column.setWidth(bound);
         column.setResizable(false);
         column.setMoveable(true);
+        column.addSelectionListener(getSelectionAdapter(column, colNumber));
         return viewerColumn;
+    }
+    
+    private SelectionAdapter getSelectionAdapter(final TableColumn column, final int index) {
+        SelectionAdapter selectionAdapter = new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                comparator.setColumn(index);
+                int dir = comparator.getDirection();
+                viewer.getTable().setSortDirection(dir);
+                viewer.getTable().setSortColumn(column);
+                viewer.refresh();
+            }
+        };
+        return selectionAdapter;
+    }
+
+    private void createContextMenu(Viewer viewer) {
+        MenuManager contextMenu = new MenuManager("#ViewerMenu"); //$NON-NLS-1$
+        contextMenu.setRemoveAllWhenShown(true);
+        contextMenu.addMenuListener(new IMenuListener() {
+            @Override
+            public void menuAboutToShow(IMenuManager mgr) {
+                fillContextMenu(mgr);
+            }
+        });
+
+        Menu menu = contextMenu.createContextMenu(viewer.getControl());
+        viewer.getControl().setMenu(menu);
+    }
+    
+    private void fillContextMenu(IMenuManager contextMenu) {
+        contextMenu.add(new GroupMarker(IWorkbenchActionConstants.MB_ADDITIONS));
+
+        IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+        
+        contextMenu.add(new Action("Add") {
+            @Override
+            public void run() {
+                BookDialog dialog = new BookDialog(getViewSite().getShell());
+                dialog.open();
+                if (dialog.getBook() != null) {
+                    input.add(dialog.getBook());
+                }
+                viewer.refresh();
+            }
+        });
+        
+        contextMenu.add(new Action("Edit") {
+            @Override
+            public void run() {
+                Book selectedBook = (Book) selection.getFirstElement();
+                try {
+                    BookDialog dialog = new BookDialog(getViewSite().getShell(), selectedBook.getTitle(), selectedBook.getAuthor());
+                    dialog.open();
+                    if (dialog.getBook() != null && !dialog.getBook().equals(selectedBook)) {
+                        input.remove(selectedBook);
+                        input.add(dialog.getBook());
+                    }
+                } catch (NullPointerException e) {
+                    MessageDialog.openError(getViewSite().getShell(), "Failure", "Select book to edit!");
+                }
+                viewer.refresh();
+            }
+        });
+        contextMenu.add(new Action("Remove") {
+            @Override
+            public void run() {
+                if(!input.remove((Book) selection.getFirstElement())) {
+                    MessageDialog.openError(getViewSite().getShell(), "Failure", "Select book to remove!");
+                }
+                viewer.refresh();
+            }
+        });
     }
 
     @Override

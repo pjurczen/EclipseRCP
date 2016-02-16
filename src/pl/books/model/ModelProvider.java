@@ -17,4 +17,5 @@ public enum ModelProvider {
     public List<Book> getBooks() {
       return books;
     }
+
 }
