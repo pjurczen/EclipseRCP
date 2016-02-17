@@ -3,6 +3,7 @@ package pl.books.model;
 public class Book extends ModelObject {
     private String title;
     private String author;
+    private String lendHistory = "";
     
     public Book() {
         
@@ -13,12 +14,22 @@ public class Book extends ModelObject {
         this.title = title;
     }
     
+    public Book(String title, String author, String lendHistory) {
+        this.author = author;
+        this.title = title;
+        this.lendHistory = lendHistory;
+    }
+    
     public String getAuthor() {
         return author;
     }
     
     public String getTitle() {
         return title;
+    }
+    
+    public String getLendHistory() {
+        return lendHistory;
     }
     
     public void setAuthor(String author) {
@@ -28,7 +39,7 @@ public class Book extends ModelObject {
     public void setTitle(String title) {
         propertyChangeSupport.firePropertyChange("title", this.title, this.title = title);
     }
-
+    
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -59,6 +70,4 @@ public class Book extends ModelObject {
             return false;
         return true;
     }
-    
-    
 }

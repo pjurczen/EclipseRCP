@@ -20,6 +20,7 @@ public class BookDialog extends TitleAreaDialog {
 
     private String title = "";
     private String author = "";
+    private String lendHistory = "";
     
     private Book book;
     
@@ -27,10 +28,11 @@ public class BookDialog extends TitleAreaDialog {
         super(parentShell);
     }
     
-    public BookDialog(Shell parentShell, String tittle, String author) {
+    public BookDialog(Shell parentShell, String tittle, String author, String lendHistory) {
         super(parentShell);
         this.title = tittle;
         this.author = author;
+        this.lendHistory = lendHistory;
     }
 
     @Override
@@ -68,7 +70,7 @@ public class BookDialog extends TitleAreaDialog {
     @Override
     protected void okPressed() {
         if (titleText.getText().length() != 0 && authorText.getText().length() != 0) {
-            book = new Book(titleText.getText(), authorText.getText());
+            book = new Book(titleText.getText(), authorText.getText(), lendHistory);
             super.okPressed();
         } else {
             setErrorMessage("Both title and author are obligatory.");

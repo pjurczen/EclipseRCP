@@ -184,7 +184,8 @@ public class BooksListView extends ViewPart {
             public void run() {
                 Book selectedBook = (Book) selection.getFirstElement();
                 try {
-                    BookDialog dialog = new BookDialog(getViewSite().getShell(), selectedBook.getTitle(), selectedBook.getAuthor());
+                    BookDialog dialog = new BookDialog(getViewSite().getShell(),
+                            selectedBook.getTitle(), selectedBook.getAuthor(), selectedBook.getLendHistory());
                     dialog.open();
                     if (dialog.getBook() != null && !dialog.getBook().equals(selectedBook)) {
                         input.remove(selectedBook);
@@ -196,6 +197,7 @@ public class BooksListView extends ViewPart {
                 viewer.refresh();
             }
         });
+        
         contextMenu.add(new Action("Remove") {
             @Override
             public void run() {
@@ -207,6 +209,8 @@ public class BooksListView extends ViewPart {
         });
     }
 
+    
+    
     @Override
     public void setFocus() {
         viewer.getControl().setFocus();
