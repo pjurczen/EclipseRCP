@@ -40,6 +40,10 @@ public class Book extends ModelObject {
         propertyChangeSupport.firePropertyChange("title", this.title, this.title = title);
     }
     
+    public void setLendHistory(String lendHistory) {
+        propertyChangeSupport.firePropertyChange("lendHistory", this.lendHistory, this.lendHistory = lendHistory);
+    }
+    
     @Override
     public int hashCode() {
         final int prime = 31;

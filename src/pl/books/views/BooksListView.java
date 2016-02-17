@@ -2,6 +2,7 @@ package pl.books.views;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.ViewPart;
 
 import pl.books.dialog.BookDialog;
@@ -23,6 +24,8 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -39,6 +42,8 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
 public class BooksListView extends ViewPart {
+    public BooksListView() {
+    }
     
     private TableViewer viewer;
     private BookFilter filter;
@@ -63,6 +68,21 @@ public class BooksListView extends ViewPart {
         
         comparator = new BookComparator();
         viewer.setComparator(comparator);
+        hookDoubleClickCommand();
+    }
+
+    private void hookDoubleClickCommand() {
+        viewer.addDoubleClickListener(new IDoubleClickListener() {
+            @Override
+            public void doubleClick(DoubleClickEvent event) {
+                IHandlerService handlerService = getSite().getService(IHandlerService.class);
+                try {
+                    handlerService.executeCommand("pl.books.command.openEditor", null);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex.getMessage());
+                }
+            }
+        });
     }
 
     private void createViewer(Composite parent) {
@@ -94,10 +114,6 @@ public class BooksListView extends ViewPart {
         viewer.getControl().setLayoutData(gridData);
         
         createContextMenu(viewer);
-    }
-    
-    public TableViewer getViewer() {
-        return viewer;
     }
     
     private void createColumns(final Composite parent, final TableViewer viewer) {
@@ -208,8 +224,6 @@ public class BooksListView extends ViewPart {
             }
         });
     }
-
-    
     
     @Override
     public void setFocus() {
