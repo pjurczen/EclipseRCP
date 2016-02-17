@@ -14,11 +14,6 @@
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
-            name="Perspective"
-            class="pl.books.app.Perspective"
-            id="pl.books.perspective">
-      </perspective>
-      <perspective
             class="pl.books.perspectives.BooksListPerspective"
             id="pl.books.perspective.BooksListPerspective"
             name="Books List">
@@ -27,14 +22,15 @@
    <extension
          point="org.eclipse.ui.views">
       <view
-            name="View"
-            class="pl.books.app.View"
-            id="pl.books.view">
-      </view>
-      <view
             class="pl.books.views.BooksListView"
             id="pl.books.views.BooksListView"
             name="Books List"
+            restorable="true">
+      </view>
+      <view
+            class="pl.books.views.BookDetailsView"
+            id="pl.books.view.BookDetailsView"
+            name="Book Details"
             restorable="true">
       </view>
    </extension>
@@ -45,18 +41,15 @@
          <view
                id="pl.books.views.BooksListView"
                minimized="false"
+               ratio="0.662"
                relationship="left"
-               relative="org.eclipse.ui.editorss"
+               relative="pl.books.view.BookDetailsView"
                standalone="true">
          </view>
-      </perspectiveExtension>
-      <perspectiveExtension
-            targetID="pl.books.perspective">
          <view
-               id="pl.books.view"
+               id="pl.books.view.BookDetailsView"
                minimized="false"
-               ratio="0.5"
-               relationship="left"
+               relationship="right"
                relative="org.eclipse.ui.editorss">
          </view>
       </perspectiveExtension>
