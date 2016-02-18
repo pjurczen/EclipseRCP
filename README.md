@@ -1,0 +1,1 @@
+# EclipseRCP books library
