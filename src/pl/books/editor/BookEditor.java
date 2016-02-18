@@ -188,6 +188,7 @@ public class BookEditor extends EditorPart {
               public void propertyChange(PropertyChangeEvent evt) {
                   book.setTitle(evt.getNewValue().toString());
                   bookTitle.setText(book.getTitle());
+                  setPartName("Editing book: " + book.getTitle());
               }
           });
           
