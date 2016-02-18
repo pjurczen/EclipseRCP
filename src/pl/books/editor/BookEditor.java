@@ -52,7 +52,7 @@ public class BookEditor extends EditorPart {
       
         book = this.input.getBook();
         setPartName("Editing book: " + book.getTitle());
-      
+        
         setBookPropertyListeners();
     }
     

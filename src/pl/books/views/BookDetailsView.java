@@ -1,5 +1,6 @@
 package pl.books.views;
 
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import org.eclipse.jface.viewers.ISelection;
@@ -10,6 +11,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.INullSelectionListener;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.ViewPart;
@@ -37,8 +39,6 @@ public class BookDetailsView extends ViewPart {
         lendHistoryData.setVisible(false);
         lendHistoryData.setEditable(false);
         
-        
-
         getSite().getPage().addSelectionListener(new ISelectionListener() {
             @Override
             public void selectionChanged(IWorkbenchPart part, ISelection selection) {
@@ -52,7 +52,7 @@ public class BookDetailsView extends ViewPart {
                         
                         book.addPropertyChangeListener("lendHistory", new PropertyChangeListener() {
                             @Override
-                            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                            public void propertyChange(PropertyChangeEvent evt) {
                                 lendHistoryData.setText(evt.getNewValue().toString());
                             }
                         });
@@ -60,11 +60,21 @@ public class BookDetailsView extends ViewPart {
                 }
             }
         });
+        
+        getSite().getPage().addSelectionListener(new INullSelectionListener() {
+            @Override
+            public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+                IStructuredSelection strucSelection = (IStructuredSelection) selection;
+                Object obj = strucSelection.getFirstElement();
+                if(obj == null) {
+                    lendHistoryData.setVisible(false);
+                }
+            }
+        });
     }
 
     @Override
     public void setFocus() {
-
+        
     }
-
 }

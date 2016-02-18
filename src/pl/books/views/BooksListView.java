@@ -1,6 +1,7 @@
 package pl.books.views;
 
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.ViewPart;
@@ -48,6 +49,7 @@ public class BooksListView extends ViewPart {
     private BookComparator comparator;
     private Text searchText;
     private IObservableList input;
+    private IEditorPart editor;
 
     @Override
     public void createPartControl(Composite parent) {
@@ -86,7 +88,7 @@ public class BooksListView extends ViewPart {
     private void createEditor() {
         IHandlerService handlerService = getSite().getService(IHandlerService.class);
         try {
-            handlerService.executeCommand("pl.books.command.openEditor", null);
+            editor = (IEditorPart) handlerService.executeCommand("pl.books.command.openEditor", null);
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage());
         }
@@ -225,6 +227,9 @@ public class BooksListView extends ViewPart {
             public void run() {
                 if(!input.remove((Book) selection.getFirstElement())) {
                     MessageDialog.openError(getViewSite().getShell(), "Failure", "Select book to remove!");
+                } else if(editor != null) {
+                    getSite().getPage().closeEditor(editor, false);
+                    getSite().getPage().resetPerspective();
                 }
             }
         });
