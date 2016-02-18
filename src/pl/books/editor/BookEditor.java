@@ -2,11 +2,10 @@ package pl.books.editor;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -23,6 +22,9 @@ public class BookEditor extends EditorPart {
     private BookEditorInput input;
     private Book book;
     protected boolean dirty = false;
+    private Text bookTitle;
+    private Text bookAuthors;
+    private Text bookLendHistory;
     
     @Override
     public void init(IEditorSite site, IEditorInput input) throws PartInitException {
@@ -45,34 +47,35 @@ public class BookEditor extends EditorPart {
         parent.setLayout(layout);
         
         new Label(parent, SWT.NONE).setText("Book title:");
-        Text bookTitle = new Text(parent, SWT.BORDER);
+        bookTitle = new Text(parent, SWT.BORDER);
         bookTitle.setText(book.getTitle());
         bookTitle.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
         
         new Label(parent, SWT.NONE).setText("Book authors:");
-        Text bookAuthors = new Text(parent, SWT.BORDER);
+        bookAuthors = new Text(parent, SWT.BORDER);
         bookAuthors.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
         bookAuthors.setText(book.getAuthor());
         
         new Label(parent, SWT.NONE).setText("Book lend history:");
-        Text bookLendHistory = new Text(parent, SWT.BORDER | SWT.MULTI | SWT.WRAP);
+        bookLendHistory = new Text(parent, SWT.BORDER | SWT.MULTI | SWT.WRAP);
         bookLendHistory.setLayoutData(new GridData(GridData.FILL_BOTH));
         bookLendHistory.setText(book.getLendHistory());
         
-        Button saveButton = new Button(parent, SWT.PUSH);
-        saveButton.setText("Save");
-        saveButton.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                
+        ModifyListener listener = new ModifyListener() {
+            public void modifyText(ModifyEvent e) {
+                setDirty(true);
             }
-        });
-
+        };
+        bookTitle.addModifyListener(listener);
+        bookAuthors.addModifyListener(listener);
+        bookLendHistory.addModifyListener(listener);
     }
     
     @Override
     public void doSave(IProgressMonitor monitor) {
-        // TODO Auto-generated method stub
+        book.setTitle(bookTitle.getText());
+        book.setAuthor(bookAuthors.getText());
+        book.setLendHistory(bookLendHistory.getText());
         setDirty(false);
     }
 
@@ -83,7 +86,6 @@ public class BookEditor extends EditorPart {
 
     @Override
     public void doSaveAs() {
-        // TODO Auto-generated method stub
         doSave(null);
     }
 
@@ -94,13 +96,11 @@ public class BookEditor extends EditorPart {
 
     @Override
     public boolean isSaveAsAllowed() {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public void setFocus() {
-        // TODO Auto-generated method stub
 
     }
 

@@ -70,7 +70,11 @@ public class BooksListView extends ViewPart {
         viewer.setComparator(comparator);
         hookDoubleClickCommand();
     }
-
+    
+    public TableViewer getViewer() {
+        return viewer;
+    }
+    
     private void hookDoubleClickCommand() {
         viewer.addDoubleClickListener(new IDoubleClickListener() {
             @Override
@@ -204,8 +208,8 @@ public class BooksListView extends ViewPart {
                             selectedBook.getTitle(), selectedBook.getAuthor(), selectedBook.getLendHistory());
                     dialog.open();
                     if (dialog.getBook() != null && !dialog.getBook().equals(selectedBook)) {
-                        input.remove(selectedBook);
-                        input.add(dialog.getBook());
+                        selectedBook.setAuthor(dialog.getBook().getAuthor());
+                        selectedBook.setTitle(dialog.getBook().getTitle());
                     }
                 } catch (NullPointerException e) {
                     MessageDialog.openError(getViewSite().getShell(), "Failure", "Select book to edit!");

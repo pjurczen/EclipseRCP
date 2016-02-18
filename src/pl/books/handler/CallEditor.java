@@ -6,6 +6,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
@@ -19,6 +20,7 @@ public class CallEditor extends AbstractHandler implements IHandler {
 
     @Override
     public Object execute(ExecutionEvent event) throws ExecutionException {
+        IEditorPart editor = null;
         IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);
         IWorkbenchPage page = window.getActivePage();
         ISelection selection = HandlerUtil.getCurrentSelection(event);
@@ -28,13 +30,13 @@ public class CallEditor extends AbstractHandler implements IHandler {
                 Book book = (Book) obj;
                 BookEditorInput input = new BookEditorInput(book);
                 try {
-                    page.openEditor(input, BookEditor.ID);
+                    editor = page.openEditor(input, BookEditor.ID);
                 } catch (PartInitException e) {
                     throw new RuntimeException(e);
                 }
             }
         }
-        return null;
+        return editor;
     }
 
 }
