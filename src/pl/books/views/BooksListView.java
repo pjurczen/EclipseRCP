@@ -42,8 +42,6 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
 public class BooksListView extends ViewPart {
-    public BooksListView() {
-    }
     
     private TableViewer viewer;
     private BookFilter filter;
@@ -60,14 +58,15 @@ public class BooksListView extends ViewPart {
         searchText = new Text(parent, SWT.BORDER | SWT.SEARCH);
         searchText.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
             | GridData.HORIZONTAL_ALIGN_FILL));
-        createViewer(parent);
         
+        createViewer(parent);
         
         filter = new BookFilter();
         viewer.addFilter(filter);
         
         comparator = new BookComparator();
         viewer.setComparator(comparator);
+        
         hookDoubleClickCommand();
     }
     
@@ -79,16 +78,20 @@ public class BooksListView extends ViewPart {
         viewer.addDoubleClickListener(new IDoubleClickListener() {
             @Override
             public void doubleClick(DoubleClickEvent event) {
-                IHandlerService handlerService = getSite().getService(IHandlerService.class);
-                try {
-                    handlerService.executeCommand("pl.books.command.openEditor", null);
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex.getMessage());
-                }
+                createEditor();
             }
         });
     }
 
+    private void createEditor() {
+        IHandlerService handlerService = getSite().getService(IHandlerService.class);
+        try {
+            handlerService.executeCommand("pl.books.command.openEditor", null);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex.getMessage());
+        }
+    }
+    
     private void createViewer(Composite parent) {
         viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL
             | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
@@ -195,7 +198,6 @@ public class BooksListView extends ViewPart {
                 if (dialog.getBook() != null) {
                     input.add(dialog.getBook());
                 }
-                viewer.refresh();
             }
         });
         
@@ -210,11 +212,11 @@ public class BooksListView extends ViewPart {
                     if (dialog.getBook() != null && !dialog.getBook().equals(selectedBook)) {
                         selectedBook.setAuthor(dialog.getBook().getAuthor());
                         selectedBook.setTitle(dialog.getBook().getTitle());
+                        selectedBook.setLendHistory(dialog.getBook().getLendHistory());
                     }
                 } catch (NullPointerException e) {
                     MessageDialog.openError(getViewSite().getShell(), "Failure", "Select book to edit!");
                 }
-                viewer.refresh();
             }
         });
         
@@ -224,7 +226,6 @@ public class BooksListView extends ViewPart {
                 if(!input.remove((Book) selection.getFirstElement())) {
                     MessageDialog.openError(getViewSite().getShell(), "Failure", "Select book to remove!");
                 }
-                viewer.refresh();
             }
         });
     }

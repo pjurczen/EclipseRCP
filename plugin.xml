@@ -41,7 +41,8 @@
          <view
                id="pl.books.view.BookDetailsView"
                minimized="false"
-               relationship="right"
+               ratio="0.6"
+               relationship="top"
                relative="org.eclipse.ui.editorss">
          </view>
          <view

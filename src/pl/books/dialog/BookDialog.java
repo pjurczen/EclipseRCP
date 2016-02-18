@@ -17,6 +17,7 @@ public class BookDialog extends TitleAreaDialog {
 
     private Text titleText;
     private Text authorText;
+    private Text lendText;
 
     private String title = "";
     private String author = "";
@@ -58,6 +59,7 @@ public class BookDialog extends TitleAreaDialog {
 
         createTitleText(container);
         createAuthorText(container);
+        createLendHistoryText(container);
 
         return area;
     }
@@ -70,7 +72,7 @@ public class BookDialog extends TitleAreaDialog {
     @Override
     protected void okPressed() {
         if (titleText.getText().length() != 0 && authorText.getText().length() != 0) {
-            book = new Book(titleText.getText(), authorText.getText(), lendHistory);
+            book = new Book(titleText.getText(), authorText.getText(), lendText.getText());
             super.okPressed();
         } else {
             setErrorMessage("Both title and author are obligatory.");
@@ -78,8 +80,8 @@ public class BookDialog extends TitleAreaDialog {
     }
 
     private void createTitleText(Composite container) {
-        Label lbtFirstName = new Label(container, SWT.NONE);
-        lbtFirstName.setText("Title");
+        Label lblFirstName = new Label(container, SWT.NONE);
+        lblFirstName.setText("Title");
 
         GridData dataTitle = new GridData();
         dataTitle.grabExcessHorizontalSpace = true;
@@ -91,8 +93,8 @@ public class BookDialog extends TitleAreaDialog {
     }
 
     private void createAuthorText(Composite container) {
-        Label lbtLastName = new Label(container, SWT.NONE);
-        lbtLastName.setText("Author");
+        Label lblLastName = new Label(container, SWT.NONE);
+        lblLastName.setText("Author");
 
         GridData dataAuthor = new GridData();
         dataAuthor.grabExcessHorizontalSpace = true;
@@ -103,6 +105,15 @@ public class BookDialog extends TitleAreaDialog {
         authorText.setText(author);
     }
 
+    private void createLendHistoryText(Composite container) {
+        Label lblLastName = new Label(container, SWT.NONE);
+        lblLastName.setText("Lend history");
+        
+        lendText = new Text(container, SWT.BORDER | SWT.WRAP | SWT.MULTI);
+        lendText.setLayoutData(new GridData(GridData.FILL_BOTH));
+        lendText.setText(lendHistory);
+    }
+    
     public Book getBook() {
         return book;
     }

@@ -1,9 +1,7 @@
 package pl.books.views;
 
-import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.observable.value.IObservableValue;
-import org.eclipse.jface.databinding.swt.WidgetProperties;
+import java.beans.PropertyChangeListener;
+
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
@@ -20,7 +18,6 @@ import pl.books.model.Book;
 
 public class BookDetailsView extends ViewPart {
     
-    private DataBindingContext dbc;
     private Book book;
     
     public BookDetailsView() {
@@ -28,6 +25,7 @@ public class BookDetailsView extends ViewPart {
 
     @Override
     public void createPartControl(Composite parent) {
+        
         parent.setLayout(new GridLayout(2, false));
 
         Label lendHistory = new Label(parent, SWT.NONE);
@@ -39,6 +37,8 @@ public class BookDetailsView extends ViewPart {
         lendHistoryData.setVisible(false);
         lendHistoryData.setEditable(false);
         
+        
+
         getSite().getPage().addSelectionListener(new ISelectionListener() {
             @Override
             public void selectionChanged(IWorkbenchPart part, ISelection selection) {
@@ -50,10 +50,12 @@ public class BookDetailsView extends ViewPart {
                         lendHistoryData.setText(book.getLendHistory());
                         lendHistoryData.setVisible(true);
                         
-                        dbc = new DataBindingContext();
-                        IObservableValue model = BeanProperties.value("lendHistory").observe(book);
-                        IObservableValue target = WidgetProperties.text(SWT.Modify).observe(lendHistoryData);
-                        dbc.bindValue(target, model);
+                        book.addPropertyChangeListener("lendHistory", new PropertyChangeListener() {
+                            @Override
+                            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                                lendHistoryData.setText(evt.getNewValue().toString());
+                            }
+                        });
                     }
                 }
             }

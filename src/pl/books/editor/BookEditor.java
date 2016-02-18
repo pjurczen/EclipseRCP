@@ -1,6 +1,19 @@
 package pl.books.editor;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import org.eclipse.core.databinding.Binding;
+import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.UpdateValueStrategy;
+import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.core.databinding.validation.IValidator;
+import org.eclipse.core.databinding.validation.ValidationStatus;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.databinding.fieldassist.ControlDecorationSupport;
+import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -25,19 +38,22 @@ public class BookEditor extends EditorPart {
     private Text bookTitle;
     private Text bookAuthors;
     private Text bookLendHistory;
+    private DataBindingContext dbc;
     
     @Override
     public void init(IEditorSite site, IEditorInput input) throws PartInitException {
-      if (!(input instanceof BookEditorInput)) {
-        throw new RuntimeException("Wrong input");
-      }
+        if (!(input instanceof BookEditorInput)) {
+            throw new RuntimeException("Wrong input");
+        }
 
-      this.input = (BookEditorInput) input;
-      setSite(site);
-      setInput(input);
+        this.input = (BookEditorInput) input;
+        setSite(site);
+        setInput(input);
       
-      book = this.input.getBook();
-      setPartName("Editing book: " + book.getTitle());
+        book = this.input.getBook();
+        setPartName("Editing book: " + book.getTitle());
+      
+        setBookPropertyListeners();
     }
     
     @Override
@@ -61,15 +77,14 @@ public class BookEditor extends EditorPart {
         bookLendHistory.setLayoutData(new GridData(GridData.FILL_BOTH));
         bookLendHistory.setText(book.getLendHistory());
         
-        ModifyListener listener = new ModifyListener() {
-            public void modifyText(ModifyEvent e) {
-                setDirty(true);
-            }
-        };
-        bookTitle.addModifyListener(listener);
-        bookAuthors.addModifyListener(listener);
-        bookLendHistory.addModifyListener(listener);
+        setTextModifyListeners();
         
+        UpdateValueStrategy strategy = setValidator();
+        
+        setBookTitleValidation(strategy);
+        setBookAuthorsValidation(strategy);
+        
+        setDirty(false);
     }
     
     @Override
@@ -105,4 +120,91 @@ public class BookEditor extends EditorPart {
 
     }
 
+    private void setTextModifyListeners() {
+        ModifyListener listener = new ModifyListener() {
+            public void modifyText(ModifyEvent e) {
+                if(isFieldsContentsNotEmpty() && isFieldsContentsChanged()) {
+                    setDirty(true);
+                } else {
+                    setDirty(false);
+                }
+            }
+
+            private boolean isFieldsContentsChanged() {
+                return !(bookTitle.getText().equals(book.getTitle()) &&
+                        bookAuthors.getText().equals(book.getAuthor()) && bookLendHistory.getText().equals(book.getLendHistory()));
+            }
+
+            private boolean isFieldsContentsNotEmpty() {
+                return !bookTitle.getText().isEmpty() && !bookAuthors.getText().isEmpty();
+            }
+        };
+        bookTitle.addModifyListener(listener);
+        bookAuthors.addModifyListener(listener);
+        bookLendHistory.addModifyListener(listener);
+    }
+
+    private void setBookTitleValidation(UpdateValueStrategy strategy) {
+        Book bookModel = new Book(book.getTitle(), null, null);
+        IObservableValue model = BeanProperties.value("title").observe(bookModel);
+        IObservableValue target = WidgetProperties.text(SWT.Modify).observe(bookTitle);
+        
+        dbc = new DataBindingContext();
+        Binding bindValue = dbc.bindValue(target, model, strategy, null); 
+        
+        ControlDecorationSupport.create(bindValue, SWT.TOP | SWT.LEFT);
+    }
+    
+    private void setBookAuthorsValidation(UpdateValueStrategy strategy) {
+        Book bookModel = new Book(null, book.getAuthor(), null);
+        IObservableValue model = BeanProperties.value("author").observe(bookModel);
+        IObservableValue target = WidgetProperties.text(SWT.Modify).observe(bookAuthors);
+        
+        dbc = new DataBindingContext();
+        Binding bindValue = dbc.bindValue(target, model, strategy, null); 
+        
+        ControlDecorationSupport.create(bindValue, SWT.TOP | SWT.LEFT);
+    }
+
+    private UpdateValueStrategy setValidator() {
+        IValidator validator = new IValidator() {
+            @Override
+            public IStatus validate(Object value) {
+                if (value != null && value.toString().length() > 0) {
+                    return ValidationStatus.ok();
+                }
+                return ValidationStatus.error("Field cannot be empty");
+            }
+        };
+        
+        UpdateValueStrategy strategy = new UpdateValueStrategy();
+        strategy.setBeforeSetValidator(validator);
+        return strategy;
+    }
+
+    private void setBookPropertyListeners() {
+        this.input.getBook().addPropertyChangeListener("title", new PropertyChangeListener() {
+              @Override
+              public void propertyChange(PropertyChangeEvent evt) {
+                  book.setTitle(evt.getNewValue().toString());
+                  bookTitle.setText(book.getTitle());
+              }
+          });
+          
+          this.input.getBook().addPropertyChangeListener("author", new PropertyChangeListener() {
+              @Override
+              public void propertyChange(PropertyChangeEvent evt) {
+                  book.setAuthor(evt.getNewValue().toString());
+                  bookAuthors.setText(book.getAuthor());
+              }
+          });
+          
+          this.input.getBook().addPropertyChangeListener("lendHistory", new PropertyChangeListener() {
+              @Override
+              public void propertyChange(PropertyChangeEvent evt) {
+                  book.setLendHistory(evt.getNewValue().toString());
+                  bookLendHistory.setText(book.getLendHistory());
+              }
+          });
+    }
 }

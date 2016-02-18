@@ -43,12 +43,13 @@ public class Book extends ModelObject {
     public void setLendHistory(String lendHistory) {
         propertyChangeSupport.firePropertyChange("lendHistory", this.lendHistory, this.lendHistory = lendHistory);
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((author == null) ? 0 : author.hashCode());
+        result = prime * result + ((lendHistory == null) ? 0 : lendHistory.hashCode());
         result = prime * result + ((title == null) ? 0 : title.hashCode());
         return result;
     }
@@ -67,6 +68,11 @@ public class Book extends ModelObject {
                 return false;
         } else if (!author.equals(other.author))
             return false;
+        if (lendHistory == null) {
+            if (other.lendHistory != null)
+                return false;
+        } else if (!lendHistory.equals(other.lendHistory))
+            return false;
         if (title == null) {
             if (other.title != null)
                 return false;
@@ -74,4 +80,5 @@ public class Book extends ModelObject {
             return false;
         return true;
     }
+    
 }
