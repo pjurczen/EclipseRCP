@@ -69,6 +69,7 @@ public class BookEditor extends EditorPart {
         bookTitle.addModifyListener(listener);
         bookAuthors.addModifyListener(listener);
         bookLendHistory.addModifyListener(listener);
+        
     }
     
     @Override

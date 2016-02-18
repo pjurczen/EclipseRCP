@@ -1,5 +1,9 @@
 package pl.books.views;
 
+import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
@@ -15,6 +19,10 @@ import org.eclipse.ui.part.ViewPart;
 import pl.books.model.Book;
 
 public class BookDetailsView extends ViewPart {
+    
+    private DataBindingContext dbc;
+    private Book book;
+    
     public BookDetailsView() {
     }
 
@@ -38,9 +46,14 @@ public class BookDetailsView extends ViewPart {
                     IStructuredSelection strucSelection = (IStructuredSelection) selection;
                     Object obj = strucSelection.getFirstElement();
                     if (obj instanceof Book) {
-                        Book element = (Book) obj;
-                        lendHistoryData.setText(element.getLendHistory());
+                        book = (Book) obj;
+                        lendHistoryData.setText(book.getLendHistory());
                         lendHistoryData.setVisible(true);
+                        
+                        dbc = new DataBindingContext();
+                        IObservableValue model = BeanProperties.value("lendHistory").observe(book);
+                        IObservableValue target = WidgetProperties.text(SWT.Modify).observe(lendHistoryData);
+                        dbc.bindValue(target, model);
                     }
                 }
             }
