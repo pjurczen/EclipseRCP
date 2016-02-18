@@ -16,7 +16,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.list.IObservableList;
-import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuListener;
@@ -102,7 +101,7 @@ public class BooksListView extends ViewPart {
         table.setHeaderVisible(true);
         table.setLinesVisible(true);
         
-        input = new WritableList(ModelProvider.INSTANCE.getBooks(), Book.class);
+        input = ModelProvider.INSTANCE.getBooks();
         ViewerSupport.bind(viewer, input, BeanProperties.values(new String[] { "title", "author" })); 
         
         getSite().setSelectionProvider(viewer);

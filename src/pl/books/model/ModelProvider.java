@@ -3,6 +3,8 @@ package pl.books.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.databinding.observable.list.WritableList;
+
 public enum ModelProvider {
     INSTANCE;
 
@@ -15,8 +17,8 @@ public enum ModelProvider {
         books.add(new Book("Harry Potter i kamieñ filozoficzny", "J. K. Rowling", "1. Piotr Jurczenko"));
     }
 
-    public List<Book> getBooks() {
-      return books;
+    public WritableList getBooks() {
+      return new WritableList(books, Book.class);
     }
 
 }
