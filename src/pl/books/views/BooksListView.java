@@ -173,7 +173,7 @@ public class BooksListView extends ViewPart {
     }
 
     private void createContextMenu(Viewer viewer) {
-        MenuManager contextMenu = new MenuManager("#ViewerMenu"); //$NON-NLS-1$
+        MenuManager contextMenu = new MenuManager("#ViewerMenu");
         contextMenu.setRemoveAllWhenShown(true);
         contextMenu.addMenuListener(new IMenuListener() {
             @Override

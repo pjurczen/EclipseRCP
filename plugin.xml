@@ -85,5 +85,32 @@
             name="Open Book Editor">
       </command>
    </extension>
-
-</plugin>
+   <extension
+         id="product"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="pl.books.application"
+            name="books">
+         <property
+               name="pl.books.product"
+               value="books">
+         </property>
+         <property
+               name="appName"
+               value="books">
+         </property>
+         <property
+               name="startupProgressRect"
+               value="5,275,445,15">
+         </property>
+         <property
+               name="windowImages"
+               value="icons/alt_window_16.gif,icons/alt_window_32.gif">
+         </property>
+         <property
+               name="preferenceCustomization"
+               value="plugin_customization.ini">
+         </property>
+      </product>
+   </extension>
+ </plugin>
